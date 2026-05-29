@@ -85,6 +85,9 @@ def encrypt_packet(image_bytes, sender_id, receiver_id, receiver_pub_pem):
         "timestamp": int(time.time()),
         "nonce": base64.b64encode(nonce).decode('utf-8')
     }
+
+    #THÊM DÒNG NÀY ĐỂ DEBUG
+    print(f"Debug Metadata: {json.dumps(metadata, indent=4)}")
     
     # [YÊU CẦU 2]: Mã hóa bằng cơ chế có xác thực (AES-GCM)
     payload = json.dumps(metadata).encode('utf-8') + b"|||" + wm_image

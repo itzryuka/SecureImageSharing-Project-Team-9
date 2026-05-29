@@ -1,4 +1,4 @@
-import os, base64, logging, json
+import os, base64, logging, json, hashlib
 from flask import render_template, request, jsonify, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from SecureImageSharing import app
@@ -102,6 +102,24 @@ def api_messages(receiver):
             result.append({"sender": m.sender, "is_image": False, "content": m.content})
             
     return jsonify(result)
+
+@app.route('/api/verify_image', methods=['POST'])
+def verify_image():
+    file = request.files.get('file')
+    original_hash = request.form.get('original_hash')
+    
+    if not file or not original_hash:
+        return jsonify({"status": "error", "msg": "Thiếu file hoặc mã băm!"})
+        
+    # Tính toán lại mã băm của bức ảnh vừa tải lên
+    img_bytes = file.read()
+    current_hash = hashlib.sha256(img_bytes).hexdigest()
+    
+    # So sánh
+    if current_hash == original_hash:
+        return jsonify({"status": "success", "msg": "✅ ẢNH NGUYÊN VẸN: Khớp mã băm, Watermark chưa bị can thiệp."})
+    else:
+        return jsonify({"status": "error", "msg": "❌ CẢNH BÁO: Ảnh đã bị Crop, chỉnh sửa hoặc xóa Watermark!"})
 
 # Khởi tạo DB khi chạy
 with app.app_context():
