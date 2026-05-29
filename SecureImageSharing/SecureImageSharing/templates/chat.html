@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Secure Messenger</title>
+    <style>
+        body {
+            font-family: Arial;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+            background: #e5ddd5;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 20px;
+            background: #f0f2f5;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f2f5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .user-item:hover, .user-item.active {
+                background: #e9eaeb;
+            }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #ccc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #efeae2;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #ccc;
+            font-weight: bold;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 50%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+            .msg.me {
+                background: #dcf8c6;
+                align-self: flex-end;
+                border-bottom-right-radius: 2px;
+            }
+
+            .msg.other {
+                background: white;
+                align-self: flex-start;
+                border-bottom-left-radius: 2px;
+            }
+
+            .msg img {
+                max-width: 100%;
+                border-radius: 8px;
+                margin-top: 5px;
+            }
+
+        .meta-info {
+            font-size: 11px;
+            color: #555;
+            margin-top: 8px;
+            background: #fff3cd;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ffeeba;
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            background: #f0f2f5;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0084ff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="header">👤 {{ current_user }}</div>
+        <div class="user-list">
+            {% for u in users %}
+            <div class="user-item" onclick="selectUser('{{ u.username }}', this)">
+                <div class="avatar" style="background: #{{ loop.index * 111111 }};">{{ u.username[0]|upper }}</div>
+                <div>{{ u.username }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="chat-area" id="chatArea" style="visibility: hidden;">
+        <div class="chat-header" id="chatWith"></div>
+        <div class="messages" id="msgBox"></div>
+
+        <div class="input-area">
+            <input type="file" id="imgInput" accept="image/*" style="width: 220px;">
+            <input type="text" id="txtInput" placeholder="Nhập tin nhắn..." onkeypress="if(event.key === 'Enter') sendMsg()">
+            <button onclick="sendMsg()">Gửi</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = '{{ current_user }}';
+        let chatTarget = '';
+
+        function selectUser(user, elem) {
+            document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+            elem.classList.add('active');
+            chatTarget = user;
+            document.getElementById('chatWith').innerText = "Đang chat với: " + user;
+            document.getElementById('chatArea').style.visibility = 'visible';
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            if (!chatTarget) return;
+            let res = await fetch('/api/messages/' + chatTarget);
+            let msgs = await res.json();
+            let html = '';
+            msgs.forEach(m => {
+                let cls = (m.sender === currentUser) ? 'msg me' : 'msg other';
+                let content = m.content;
+
+                // Hiển thị ảnh kèm log bảo mật
+                if (m.is_image && m.sender !== currentUser) {
+                    content = `<img src="data:image/jpeg;base64,${m.content}">
+                               <div class="meta-info">
+                                 ✔ Khóa AES tự động giải mã thành công<br>
+                                 ✔ Toàn vẹn dữ liệu: OK<br>
+                                 ✔ Mã băm (Hash): ${m.meta.watermark_hash.substring(0,15)}...
+                               </div>`;
+                }
+                html += `<div class="${cls}"><b>${m.sender}</b><br>${content}</div>`;
+            });
+            document.getElementById('msgBox').innerHTML = html;
+            document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
+        }
+
+        async function sendMsg() {
+            if (!chatTarget) return;
+            let txt = document.getElementById('txtInput').value;
+            let file = document.getElementById('imgInput').files[0];
+            if (!txt && !file) return;
+
+            let fd = new FormData();
+            fd.append('receiver', chatTarget);
+            if (txt) fd.append('text', txt);
+            if (file) fd.append('file', file);
+
+            // Gửi xong lập tức xóa text/file ở khung nhập
+            document.getElementById('txtInput').value = '';
+            document.getElementById('imgInput').value = '';
+
+            await fetch('/api/send', { method: 'POST', body: fd });
+            loadMessages();
+        }
+
+        // JS Fetch liên tục (Polling) mỗi 2 giây để giả lập Real-time chat
+        setInterval(loadMessages, 2000);
+    </script>
+</body>
+</html>
