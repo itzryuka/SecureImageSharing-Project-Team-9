@@ -125,16 +125,16 @@ Trình duyệt sẽ tự động mở trang web tại địa chỉ: http://local
 4. Người dùng ở máy 2 nhập địa chỉ IP mới kèm port http://[IPv4_CUA_MAY_SERVER]:5000 lên trình duyệt để truy cập bình thường.
 
 ## 📚 Tài liệu tham khảo
-1. **Cryptography Package (Python)**
+1. **Cryptography Package (Python)**  
    [https://cryptography.io/en/latest/](https://cryptography.io/en/latest/)
 
-2. **Authenticated Encryption (AES-GCM)**
+2. **Authenticated Encryption (AES-GCM)**  
    [https://en.wikipedia.org/wiki/Galois/Counter_Mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode)
 
-3. **Pillow (Image Processing)**
+3. **Pillow (Image Processing)**  
    [https://pillow.readthedocs.io/](https://pillow.readthedocs.io/)
 
-4. **Flask Documentation**
+4. **Flask Documentation**  
    [https://flask.palletsprojects.com/](https://flask.palletsprojects.com/)
 
 5. **DES (Data Encryption Standard) – Wikipedia**  
