@@ -140,6 +140,13 @@
             cursor: pointer;
             font-weight: bold;
         }
+        /* Khung Modal So Sánh Ảnh */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 800px; text-align: center; }
+        .compare-container { display: flex; gap: 20px; margin-top: 15px; }
+        .compare-box { flex: 1; }
+        .compare-box img { max-width: 100%; border: 2px solid #ccc; border-radius: 8px; }
+        .close-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; margin-top: 15px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -214,16 +221,38 @@
             if (txt) fd.append('text', txt);
             if (file) fd.append('file', file);
 
-            // Gửi xong lập tức xóa text/file ở khung nhập
             document.getElementById('txtInput').value = '';
             document.getElementById('imgInput').value = '';
 
-            await fetch('/api/send', { method: 'POST', body: fd });
+            let res = await fetch('/api/send', { method: 'POST', body: fd });
+            let data = await res.json();
+
+            // Nếu gửi file thành công, bật popup so sánh ảnh
+            if (data.original_img && data.watermarked_img) {
+                document.getElementById('imgBefore').src = "data:image/jpeg;base64," + data.original_img;
+                document.getElementById('imgAfter').src = "data:image/jpeg;base64," + data.watermarked_img;
+                document.getElementById('compareModal').style.display = 'flex';
+            }
+
             loadMessages();
         }
-
-        // JS Fetch liên tục (Polling) mỗi 2 giây để giả lập Real-time chat
-        setInterval(loadMessages, 2000);
     </script>
 </body>
+<div class="modal-overlay" id="compareModal">
+    <div class="modal-content">
+        <h3>🔍 So sánh ảnh trước và sau khi gắn Watermark</h3>
+        <p>Hệ thống vừa tự động chèn Watermark chéo và đóng gói mã hóa ảnh của bạn.</p>
+        <div class="compare-container">
+            <div class="compare-box">
+                <h4>Ảnh Gốc (Original)</h4>
+                <img id="imgBefore" src="">
+            </div>
+            <div class="compare-box">
+                <h4>Ảnh đã xử lý (Watermarked)</h4>
+                <img id="imgAfter" src="">
+            </div>
+        </div>
+        <button class="close-btn" onclick="document.getElementById('compareModal').style.display='none'">Xác nhận & Đóng</button>
+    </div>
+</div>
 </html>

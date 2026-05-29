@@ -53,17 +53,29 @@ def api_send():
     file = request.files.get('file')
     
     if file:
+        file_bytes = file.read()
         recv_user = User.query.filter_by(username=receiver).first()
-        nonce, enc_key, cipher = encrypt_packet(file.read(), sender, receiver, recv_user.pub_key)
+        
+        # Nhận thêm biến wm_image từ hàm encrypt_packet
+        wm_image, nonce, enc_key, cipher = encrypt_packet(file_bytes, sender, receiver, recv_user.pub_key)
+        
         packet = f"{base64.b64encode(nonce).decode()}|{base64.b64encode(enc_key).decode()}|{base64.b64encode(cipher).decode()}"
         msg = Message(sender=sender, receiver=receiver, is_image=True, content=packet)
+        logging.info(f"[{sender}] Gửi ảnh mã hóa cho [{receiver}]")
+        db.session.add(msg)
+        db.session.commit()
+        
+        # Trả về Base64 của cả 2 ảnh để Frontend popup lên màn hình
+        return jsonify({
+            "status": "success", 
+            "original_img": base64.b64encode(file_bytes).decode(),
+            "watermarked_img": base64.b64encode(wm_image).decode()
+        })
     else:
         msg = Message(sender=sender, receiver=receiver, is_image=False, content=text)
-    
-    db.session.add(msg)
-    db.session.commit()
-    return jsonify({"status": "success"})
-
+        db.session.add(msg)
+        db.session.commit()
+        return jsonify({"status": "success"})
 @app.route('/api/messages/<receiver>')
 def api_messages(receiver):
     sender = session['username']
