@@ -42,7 +42,7 @@ Hệ thống cung cấp nền tảng Web Chat Real-time cho phép **gửi ảnh 
 | **SQLite** | Cơ sở dữ liệu (Flask-SQLAlchemy) |
 | **HTML/CSS/JS** | Giao diện Chat Real-time (Polling API) |
 
-## 🎯 Tính năng chính & Nâng cấp (So với bản cũ)
+## 🎯 Tính năng chính
 
 - ✅ **Giao diện Chat Real-time:** Hoạt động mượt mà dựa theo các app nhắn tin.
 - ✅ **Mã hóa có xác thực:** Khắc phục nhược điểm của DES, AES-GCM tự động phát hiện thay đổi (MAC Tag).
