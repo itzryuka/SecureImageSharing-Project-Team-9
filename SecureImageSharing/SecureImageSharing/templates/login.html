@@ -1,35 +1,60 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <title>Đăng nhập - Secure Chat</title>
+    <meta charset="UTF-8">
+    <title>Xác thực Hệ thống - Secure Messenger</title>
     <style>
         body {
-            font-family: Arial;
-            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e5ddd5;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             margin: 0;
         }
 
-        .login-box {
+        .auth-container {
             background: white;
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 360px;
             text-align: center;
-            width: 300px;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
+        h2 {
+            color: #12294A;
+            margin-bottom: 25px;
+            font-size: 22px;
         }
+
+        .input-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+            .input-group label {
+                font-size: 13.5px;
+                font-weight: bold;
+                color: #444;
+                display: block;
+                margin-bottom: 6px;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 11px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                box-sizing: border-box;
+                font-size: 15px;
+                outline: none;
+            }
+
+                .input-group input:focus {
+                    border-color: #0084ff;
+                }
 
         button {
             width: 100%;
@@ -38,18 +63,106 @@
             color: white;
             border: none;
             border-radius: 6px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            margin-top: 8px;
+            transition: 0.2s;
+        }
+
+            button:hover {
+                background: #006bce;
+            }
+
+        .switch-text {
+            margin-top: 20px;
+            font-size: 13.5px;
+            color: #666;
+        }
+
+            .switch-text a {
+                color: #0084ff;
+                text-decoration: none;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            font-size: 13.5px;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h2>Secure Messenger</h2>
-        <form method="post">
-            <input type="text" name="username" placeholder="Nhập tên định danh của bạn" required>
-            <button type="submit">Vào Chat</button>
+
+    <div class="auth-container">
+        <h2 id="form-title">🔐 Đăng nhập hệ thống</h2>
+
+        {% if error %}
+        <div class="alert alert-error">⚠️ {{ error }}</div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success">{{ success }}</div>
+        {% endif %}
+
+        <form id="auth-form" action="/" method="POST">
+            <div class="input-group">
+                <label>Tên đăng nhập (Username):</label>
+                <input type="text" name="username" required placeholder="Nhập tài khoản...">
+            </div>
+            <div class="input-group">
+                <label>Mật khẩu (Password):</label>
+                <input type="password" name="password" required placeholder="Nhập mật khẩu...">
+            </div>
+            <button type="submit" id="submit-btn">Xác thực Đăng nhập</button>
         </form>
+
+        <div class="switch-text" id="switch-prompt">
+            Hệ thống nội bộ chưa có tài khoản? <a onclick="toggleMode('register')">Đăng ký mới</a>
+        </div>
     </div>
+
+    <script>
+    let mode = "{{ mode | default('login') }}";
+
+    function toggleMode(targetMode) {
+        let form = document.getElementById('auth-form');
+        let title = document.getElementById('form-title');
+        let btn = document.getElementById('submit-btn');
+        let prompt = document.getElementById('switch-prompt');
+
+        if (targetMode === 'register') {
+            form.action = '/register';
+            title.innerText = '📝 Đăng ký tài khoản mới';
+            btn.innerText = 'Đăng ký & Cấp khóa RSA';
+            btn.style.background = '#28a745';
+            prompt.innerHTML = 'Đã cấp tài khoản nội bộ? <a onclick="toggleMode(\'login\')">Đăng nhập</a>';
+        } else {
+            form.action = '/';
+            title.innerText = '🔐 Đăng nhập hệ thống';
+            btn.innerText = 'Xác thực Đăng nhập';
+            btn.style.background = '#0084ff';
+            prompt.innerHTML = 'Hệ thống nội bộ chưa có tài khoản? <a onclick="toggleMode(\'register\')">Đăng ký mới</a>';
+        }
+    }
+    if (mode === 'register') toggleMode('register');
+    </script>
+
 </body>
 </html>

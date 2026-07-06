@@ -192,7 +192,12 @@
 </head>
 <body>
     <div class="sidebar">
-        <div class="header">👤 {{ current_user }}</div>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>👤 {{ current_user }}</span>
+            <button onclick="window.location.href='/logout'" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);">
+                Đăng xuất 🚪
+            </button>
+        </div> 
         <div class="user-list">
             {% for u in users %}
             <div class="user-item" onclick="selectUser('{{ u.username }}', this)">
@@ -201,9 +206,7 @@
             </div>
             {% endfor %}
         </div>
-    </div>
-
-    <div class="chat-area" id="chatArea" style="visibility: hidden;">
+    </div> <div class="chat-area" id="chatArea" style="visibility: hidden;">
         <div class="chat-header" id="chatWith"></div>
         <div class="messages" id="msgBox"></div>
 
@@ -303,6 +306,12 @@
 
             let res = await fetch('/api/send', { method: 'POST', body: fd });
             let data = await res.json();
+
+            // 🛡️ BẮT LỖI TỪ HỆ THỐNG PHÒNG THỦ
+            if (data.status === 'error') {
+                alert(data.msg); // Bắn Popup thông báo chữ đỏ cho user biết file bị chặn
+                return; // Ngắt hàm, không chạy phần hiển thị Modal bên dưới
+            }
 
             if (data.original_img && data.watermarked_img) {
                 document.getElementById('imgBefore').src = "data:image/jpeg;base64," + data.original_img;
