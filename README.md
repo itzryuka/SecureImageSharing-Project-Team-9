@@ -87,13 +87,22 @@ Hệ thống cung cấp nền tảng Web Chat Real-time tập trung chuyên sâu
         └── chat.html      # Giao diện Chat Real-time & Giám định ảnh
 ```
 
-## 🚀 Hướng dẫn Chạy ứng dụng
-
 ### 1. Cài đặt thư viện yêu cầu:
+Đối với Visual Studio ( Tím):
+
+1. Bên phần Solution Explorer -> Chọn Python Environments
+2. Chuột phải vào Python 3.14.2 (tùy phiên bản) hoặc là env(Đây là môi trường ảo)
+3. Chọn install from requirements.txt
+
 Mở Terminal/CMD và chạy lệnh:
 ```bash
-pip install -r requirements.txt
+cd SecureImageSharing
 ```
+
+```bash
+py -m pip install -r requirements.txt
+```
+*(Lưu ý: Cách mở CMD này dùng cả hai bản đều cài được nhưng khi dùng Visual Studio mà thấy khó quá thì dùng cách trên sẽ dễ hơn)*
 
 ### 2. Cách chạy bằng VS Code (Visual Studio Code - Bản Xanh)
 1. Chuột phải vào thư mục dự án chọn **"Open with Code"** (Hoặc mở VS Code lên và kéo thả thư mục dự án vào).
